@@ -1,16 +1,19 @@
-# Syntax (and Semantic)
+# Syntax (and Semantics)
 
-## General rules
+## Concepts
 
 * Statements are terminated with a `;` character.
 * Variables are immutable by default.
 * A pointer can only be created from a mutable variable.
+* Manual memory allocation can be done through unsafe functions `malloc` and `free`.
 
 ## Variables
 
 #### Immutable variable declaration
 
 ```ezscript
+module Examples.ImmutableVariables;
+
 var variable: type = ...;
 // Examples:
 var firstName: string = "John";
@@ -24,6 +27,8 @@ age++; // Throws a type error
 ### Mutable variable declarations
 
 ```ezscript
+module Examples.MutableVariables;
+
 var variable: mut type = ...;
 // Examples
 var firstName: mut string = "John";
@@ -33,10 +38,12 @@ var age: mut int = 23;
 age++; // This is okay
 ```
 
-### Pointer variable declarations
+### Smart pointer variable declarations
 
 ```ezscript
-var variable: type = ...;
+module Examples.SharedPtr;
+
+// syntax: var variable: type = ...;
 var pointerVariable: ptr<type> = &variable;
 
 // examples
@@ -58,6 +65,8 @@ var newPtr: ptr<mut int> = new int(99);
 Using different pointer types like `ptr`, `ownptr`, and `weakptr`.
 
 ```ezscript
+module Examples.DifferentPtrs;
+
 var myWeakPtr: weakptr<mut int> = null;
 // doing *myWeakPtr or anything to retrieve/modify will throw NullException
 
@@ -76,9 +85,27 @@ if (myWeakPtr.expired()) {
 }
 ```
 
+### Unsafe pointers and unsafe memory management
+
+```ezscript
+module Examples.UnsafeMemoryAllocation;
+import Random from System.Crypto;
+
+// Allocate 256 bytes
+var bytes: mut *byte = malloc(256);
+
+for (i = 0; i < 256; ++i) {
+    // Set each byte to a random value between 0 and 10
+    *(bytes + i) = Random.integer(0, 10);
+}
+
+// IMPORTANT, you must always manually free the memory
+free(bytes);
+```
+
 ## Functions
 
-## General rules
+## Concepts
 
 * Primitive immutable variables are passed to function by value.
 * Primitive mutable variables are passed to function by pointer/reference.
@@ -89,6 +116,8 @@ if (myWeakPtr.expired()) {
 Global (in current module) function:
 
 ```ezscript
+module Examples.GlobalFunction;
+
 fun add(a: int, b: int): int {
     ret a + b;
 }
@@ -97,6 +126,8 @@ fun add(a: int, b: int): int {
 Lambda functions:
 
 ```ezscript
+module Examples.LambdaFunctions;
+
 var events: object = {}
 
 fn listen(eventName: string, callback: callable): void {
@@ -105,7 +136,7 @@ fn listen(eventName: string, callback: callable): void {
     } 
 }
 
-fn trigger(eventName: string, eventData: array): void {
+fn trigger(eventName: string, eventData: object): void {
     if (!events.has(eventName)) {
         ret;
     }
@@ -115,15 +146,22 @@ fn trigger(eventName: string, eventData: array): void {
     });
 }
 
-listen('click', fn (data: array) {
+listen('click', fn (data: object) {
     // Just an example...
     __context.logger.debug('event data', data);
+});
+
+// Will call all the listeners registered through listener.
+trigger('click',  {
+    target: 'window',
 });
 ```
 
 Templated function:
 
 ```ezscript
+module Examples.TemplatedFunction;
+
 template<T>
 fn add(a: T, b: T): T => a + b;
 
@@ -148,12 +186,15 @@ add('Hello ', 'world'); // return 'Hello world'
 ### Very simple Person class
 
 ```ezscript
+module Examples.SimpleClass;
+export Person; // or simply declare class as "pub class Person"
+
 class Person {
     var name: mut string;
     var age: mut int;
     
     // Automatically generate appropiate constructors (same as below)
-    constructor(...) = auto;
+    constructor() = auto;
     
     // Or manually create two constructors
     constructor() {
@@ -201,6 +242,8 @@ class Person {
 ## Simple templated container class
 
 ```ezscript
+module Examples.TemplatedClass;
+
 template<T>
 class Container {
     var data: mut array; 
@@ -234,4 +277,50 @@ class Container {
         return item;
     }
 }
+```
+
+## Interfaces
+
+### Concepts
+
+* An interface is an abstract type. It can never be instantiated.
+* Interfaces are used to describe how a certain Feature or Type should behave.
+
+### Simple interface
+
+```ezscript
+module Examples.SimpleInterface;
+import Console from System.IO;
+
+pub interface Visitor {
+    // Pass by ref
+    handle(expr: &Expression): void;
+}
+
+pub interface Expression {
+    visit(visitor: Visotor): void;
+}
+
+pub class LiteralExpression implements Expression {
+    var value: int;
+    constructor() = auto;
+    
+    // Note how we can change the type
+    visit(visitor: &LiteralVisotor): void {
+        visitor.handle(this); 
+    }
+    
+    getValue() => this.value;
+}
+
+pub class LiteralVisitor implements Visitor {
+    handle(expr: &Expression): void {
+        Console.println("Literal value: {}", expr.getValue()); 
+    }
+}
+
+var visitor = new LiteralVisitor();
+var expression = new LiteralExpression(25);
+
+expression.visit(visitor); // Prints "Literal value: 25" to console stdout
 ```

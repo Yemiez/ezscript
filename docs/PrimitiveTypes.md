@@ -3,8 +3,14 @@
 * object (dynamic and changeable "class")
 * array (dynamic array that can store any value)
 * float
-* int
+* uint32
+* uint64
+* int32
+* int64
+* int (size is based on process architecture)
+* uint (size is based on process architecture)
 * string
+* byte
 * callable
 * ptr\<T\> - Reference counted shared pointer
 * weakptr\<T\> - Weak pointer to a ptr or ownptr
