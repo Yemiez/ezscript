@@ -4,6 +4,10 @@ html, body {
     color: white;
 }
 
+pre {
+    font-family: "JetBrains Mono", serif;
+}
+
 .container {
     width: 1280px;
     min-height: 200px;
@@ -39,14 +43,16 @@ html, body {
 .token--comment__simple,
 .token--comment__long {
     color: #2cff2c;
-    /* color: black; */}
+    /* color: black; */
+}
 
 .token--identifier {
     color: orange;
 }
 
 .token--keyword {
-    color: #7e7eff;}
+    color: #7e7eff;
+}
 
 .token--string {
     color: red;

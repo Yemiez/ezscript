@@ -30,8 +30,7 @@
   },
   "autoload": {
     "psr-4": {
-      "EzScript\\": "src/EzScript",
-      "Core\\": "src/Core"
+      "Rizen\\": "src/Rizen"
     }
   }
 }

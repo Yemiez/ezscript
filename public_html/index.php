@@ -1,9 +1,8 @@
 <?php
 
-use Core\Lex\GenericLexer;
-use Core\Lex\Keyword\KeywordDictionary;
-use Core\Lex\Stream\StreamInterface;
-use Core\Lex\Token\TokenType;
+use Rizen\Core\Input\FileInput;
+use Rizen\Core\Stream\TokenStream;
+use Rizen\Core\Token\TokenType;
 
 include '../vendor/autoload.php';
 
@@ -12,10 +11,10 @@ function isAction(string $action): bool
     return $action === ($_GET['action'] ?? '');
 }
 
-function printTokenStream(StreamInterface $stream, bool $onlyBody = false)
+function printTokenStream(TokenStream $stream, bool $onlyBody = false)
 {
     if (!$onlyBody) {
-        echo '<b>' . $stream->peek()->getSourceContext()->getFilename() . '</b>';
+        echo '<b>' . $stream->peek()->getSourceString()->getContextName() . '</b>';
         echo '<pre class="source-container" contenteditable="true">';
     }
     while (!$stream->eof()) {
@@ -47,35 +46,7 @@ function printTokenStream(StreamInterface $stream, bool $onlyBody = false)
     }
 }
 
-$lexer = new GenericLexer(
-    new KeywordDictionary([
-        'module',
-        'import',
-        'export',
-        'from',
-        'as',
-        'class',
-        'implements',
-        'this',
-        'array',
-        'string',
-        'pub',
-        'mut',
-        'fn',
-        'void',
-        'const',
-        'new',
-        'ret',
-        'private',
-        'public',
-        'protected',
-        'extends',
-        'int',
-        'float',
-        'var',
-        'null',
-    ])
-);
+$lexer = new \Rizen\RizenLexer();
 
 if (isAction('lex')) {
     $code = $_POST['code'] ?? '';
@@ -98,132 +69,137 @@ header('content-type: text/html; charset=utf8');
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Lexing test</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/main.css?<?= time() ?>">
 </head>
 <body>
 <div class="container">
     <?php
 
-    $usage = $lexer->lexFile('../examples/usage.ez');
+    $array = $lexer->lex(new FileInput('../examples/array.ez'));
+    $usage = $lexer->lex(new FileInput('../examples/usage.ez'));
+    printTokenStream($array);
     printTokenStream($usage);
 
     ?>
 </div>
 <script>
-	const editor = document.getElementsByClassName('source-container').item(0)
+    const editor = document.getElementsByClassName('source-container').item(0)
 
-	class QueueItem {
-		constructor(parent, id, content) {
-			this.parent = parent
-			this.id = id
-			this.content = content
-			this.caret = {
-				line: JSON.parse(document.getSelection().anchorNode.parentElement.getAttribute('data-meta')).lineStart,
-				column: document.getSelection().anchorOffset,
-			}
+    class QueueItem {
+        constructor(parent, id, content) {
+            this.parent = parent
+            this.id = id
+            this.content = content
+            this.caret = {
+                line: JSON.parse(document.getSelection().anchorNode.parentElement.getAttribute('data-meta')).lineStart,
+                column: document.getSelection().anchorOffset,
+            }
 
-			console.log('Created QueueItem with id: ', id)
-			this.createRequest()
-		}
+            console.log('Created QueueItem with id: ', id)
+            this.createRequest()
+        }
 
-		createRequest() {
-			const params = new URLSearchParams()
-			params.append('code', this.content)
+        createRequest() {
+            const params = new URLSearchParams()
+            params.append('code', this.content)
 
-			this.request = fetch(window.location + '?action=lex', {
-				method: 'POST',
-				body: params,
-			})
+            this.request = fetch(window.location + '?action=lex', {
+                method: 'POST',
+                body: params,
+            })
 
-			this.request.then((r) => r.text()).then(t => this.handleResponse(t))
-		}
+            this.request.then((r) => r.text()).then(t => this.handleResponse(t))
+        }
 
-		handleResponse(response) {
-			this.parent.notify('QueueItemDone', response, this)
-		}
-	}
+        handleResponse(response) {
+            this.parent.notify('QueueItemDone', response, this)
+        }
+    }
 
-	class RequestQueue {
-		constructor() {
-			this.queue = []
-			this.listeners = {}
-			this.ids = 0
+    class RequestQueue {
+        constructor() {
+            this.queue = []
+            this.listeners = {}
+            this.ids = 0
 
 
-			this.on('QueueItemDone', (r, q) => this.handleQueueItemDone(r, q))
-		}
+            this.on('QueueItemDone', (r, q) => this.handleQueueItemDone(r, q))
+        }
 
-		push(content) {
-			const id = this.ids++
-			this.queue[id] = new QueueItem(this, id, content)
-		}
+        push(content) {
+            const id = this.ids++
+            this.queue[id] = new QueueItem(this, id, content)
+        }
 
-		/**
-		 * @param {string} content
-		 * @param {QueueItem} q
-		 */
-		handleQueueItemDone(content, q) {
-			if (q.id < this.getLatestQueueItemId()) {
-				return
-			}
+        /**
+         * @param {string} content
+         * @param {QueueItem} q
+         */
+        handleQueueItemDone(content, q) {
+            if (q.id < this.getLatestQueueItemId()) {
+                return
+            }
 
-			this.notify('done', content, q.caret)
-			this.queue = [] // reset queue
-		}
+            this.notify('done', content, q.caret)
+            this.queue = [] // reset queue
+        }
 
-		getLatestQueueItemId() {
-			return this.queue.length === 0 ?
-				0 : this.queue.length - 1
-		}
+        getLatestQueueItemId() {
+            return this.queue.length === 0 ?
+                0 : this.queue.length - 1
+        }
 
-		on(event, callback) {
-			if (!this.listeners.hasOwnProperty(event)) {
-				this.listeners[event] = []
-			}
-			this.listeners[event].push(callback)
-		}
+        on(event, callback) {
+            if (!this.listeners.hasOwnProperty(event)) {
+                this.listeners[event] = []
+            }
+            this.listeners[event].push(callback)
+        }
 
-		notify(event, ...args) {
-			if (!this.listeners.hasOwnProperty(event)) {
-				console.log('no listeners for event: ', event)
-				return
-			}
+        notify(event, ...args) {
+            if (!this.listeners.hasOwnProperty(event)) {
+                console.log('no listeners for event: ', event)
+                return
+            }
 
-			console.log('firing event ', event, ' for ', this.listeners[event].length, ' listeners')
-			this.listeners[event].forEach(cb => cb(...args))
-		}
-	}
+            console.log('firing event ', event, ' for ', this.listeners[event].length, ' listeners')
+            this.listeners[event].forEach(cb => cb(...args))
+        }
+    }
 
-	/*
-	const queue = new RequestQueue()
-	let timeoutId = 0
-	let currentContent = editor.innerText
-	editor.addEventListener('keydown', function (e) {
-		if (currentContent === editor.innerText) {
-			return
-		}
-		console.log('querying new job')
-		clearTimeout(timeoutId)
-		timeoutId = setTimeout(() => {
-			console.log('pushing job to queue')
-			queue.push(editor.innerText, e)
-		}, 250)
-	})
+    /*
+    const queue = new RequestQueue()
+    let timeoutId = 0
+    let currentContent = editor.innerText
+    editor.addEventListener('keydown', function (e) {
+        if (currentContent === editor.innerText) {
+            return
+        }
+        console.log('querying new job')
+        clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => {
+            console.log('pushing job to queue')
+            queue.push(editor.innerText, e)
+        }, 250)
+    })
 
-	queue.on('done', (content, caret) => {
-		editor.innerHTML = content
+    queue.on('done', (content, caret) => {
+        editor.innerHTML = content
         currentContent = editor.innerText
 
         console.log('caret', caret)
         const sel = window.getSelection()
         const range = document.createRange();
-		range.setStart(editor, caret.line)
+        range.setStart(editor, caret.line)
         range.collapse(true)
         sel.removeAllRanges()
         sel.addRange(range)
         editor.focus();
-	})
-	 */
+    })
+     */
 </script>
 </body>
 </html>

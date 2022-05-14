@@ -1,18 +1,18 @@
 module Usage;
 import IntArray from Example;
 import Array from Example; // We can import the array because it was marked "pub".
+import Array<bool> as BoolArray from Example;
 
 var listOfInts: IntArray = new { [1, 2, 3, 4, 5,] };
 listOfInts.getData(); // Will return [1, 2, 3, 4, 5]
 listOfInts.setData([6, 7]); // Will throw an error because we didn't declare the variable mutable
 
 class Person {
-    private ssn: string;
-    private firstName: string;
-    private lastName: string;
-    private nickName: mut string; // Nick name can be changed
-
-    constructor(...) = default; // Generates one constructor that takes in ssn, firstName, lastName and nickName).
+    var ssn: string;
+    var firstName: string;
+    var lastName: string;
+    var nickName: mut string; // Nick name can be changed
+    constructor(...) = auto; // Generates one constructor that takes in ssn, firstName, lastName and nickName).
 
     pub fn getSsn(): string => ssn;
 
