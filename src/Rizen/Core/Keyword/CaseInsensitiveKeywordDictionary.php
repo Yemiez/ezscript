@@ -18,6 +18,12 @@ class CaseInsensitiveKeywordDictionary implements KeywordInterface
 
     public function isKeyword(string $word): bool
     {
-        return in_array($word, $this->keywords);
+        foreach ($this->keywords as $keyword) {
+            if (strcasecmp($keyword, $word) === 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

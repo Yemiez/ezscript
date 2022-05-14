@@ -78,10 +78,11 @@ header('content-type: text/html; charset=utf8');
 <div class="container">
     <?php
 
-    $array = $lexer->lex(new FileInput('../examples/array.ez'));
-    $usage = $lexer->lex(new FileInput('../examples/usage.ez'));
-    printTokenStream($array);
-    printTokenStream($usage);
+    foreach (new FilesystemIterator('../examples/', FilesystemIterator::SKIP_DOTS) as $file) {
+        if ($file->getExtension() === 'rz') {
+            printTokenStream($lexer->lex(new FileInput($file->getPathname())));
+        }
+    }
 
     ?>
 </div>

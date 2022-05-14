@@ -1,0 +1,70 @@
+module Examples.Pointers;
+import {Ptr, OwnPtr, WeakPtr} from Standard.Memory;
+import {HashMap, Vector} from Standard.Containers;
+import Random from Standard.Security;
+import Console from Standard.IO;
+import Callable from Standard.Reflection;
+
+class Person {
+    var name: mut string;
+    var age: mut int;
+    var events: mut HashMap<string, Vector<Callable>>;
+
+    constructor(...) = auto;
+
+    pub fn getName() => this.name;
+
+    pub fn getAge() => this.age;
+
+    mut fn setName(name: string): this {
+        this.name = name;
+        this.trigger('change');
+    }
+
+    mut fn setAge(age: int): this {
+        this.age = age;
+        this.trigger('change');
+    }
+
+    mut fn listen(event: string, cb: Callable) {
+        if (!this.events.has(event)) {
+            this.events.insert(event, new Vector<Callable>{});
+        }
+
+        this.events.get(event).push(cb);
+    }
+
+    pub fn trigger(event: string) {
+        if (!this.events.has(event)) {
+            ret;
+        }
+
+        this.events.get(event).each(fn(cb: Callable) => {
+            cb(weak this);
+        });
+    }
+}
+
+pub fn onPersonChanged(person: WeakPtr<Person>) {
+    Console.writeln('Person changed: {} ({} years)', person.getName(), person.getAge());
+}
+
+pub fn main() {
+    var people: mut Vector<ownptr<mut Person>> = new {};
+
+    // Add 5-10 random people
+    for (var i : Random.range(5, 10)) {
+        var person: ownptr<mut Person> = new Person(Random.str(10), Random.number(20, 50));
+        person.listen('change', &onPersonChanged);
+        people.push(person);
+    }
+
+    people[0].setName('Oskar').setAge(22);
+}
+
+main();
+/*
+This would print something like:
+    Person changed: Oskar ({random number} years)
+    Person changed: Oskar (22 years)
+*/
