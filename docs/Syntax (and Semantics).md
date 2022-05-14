@@ -11,7 +11,7 @@
 
 #### Immutable variable declaration
 
-```ezscript
+```go
 module Examples.ImmutableVariables;
 
 var variable: type = ...;
@@ -26,7 +26,7 @@ age++; // Throws a type error
 
 ### Mutable variable declarations
 
-```ezscript
+```go
 module Examples.MutableVariables;
 
 var variable: mut type = ...;
@@ -40,7 +40,7 @@ age++; // This is okay
 
 ### Smart pointer variable declarations
 
-```ezscript
+```go
 module Examples.SharedPtr;
 
 // syntax: var variable: type = ...;
@@ -64,7 +64,7 @@ var newPtr: ptr<mut int> = new int(99);
 
 Using different pointer types like `ptr`, `ownptr`, and `weakptr`.
 
-```ezscript
+```go
 module Examples.DifferentPtrs;
 
 var myWeakPtr: weakptr<mut int> = null;
@@ -87,7 +87,7 @@ if (myWeakPtr.expired()) {
 
 ### Unsafe pointers and unsafe memory management
 
-```ezscript
+```go
 module Examples.UnsafeMemoryAllocation;
 import Random from System.Crypto;
 
@@ -115,7 +115,7 @@ free(bytes);
 
 Global (in current module) function:
 
-```ezscript
+```go
 module Examples.GlobalFunction;
 
 fun add(a: int, b: int): int {
@@ -125,7 +125,7 @@ fun add(a: int, b: int): int {
 
 Lambda functions:
 
-```ezscript
+```go
 module Examples.LambdaFunctions;
 
 var events: object = {}
@@ -159,7 +159,7 @@ trigger('click',  {
 
 Templated function:
 
-```ezscript
+```go
 module Examples.TemplatedFunction;
 
 template<T>
@@ -185,7 +185,7 @@ add('Hello ', 'world'); // return 'Hello world'
 
 ### Very simple Person class
 
-```ezscript
+```go
 module Examples.SimpleClass;
 export Person; // or simply declare class as "pub class Person"
 
@@ -241,7 +241,7 @@ class Person {
 
 ## Simple templated container class
 
-```ezscript
+```go
 module Examples.TemplatedClass;
 
 template<T>
@@ -288,7 +288,7 @@ class Container {
 
 ### Simple interface
 
-```ezscript
+```go
 module Examples.SimpleInterface;
 import Console from System.IO;
 
