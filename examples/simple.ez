@@ -1,0 +1,27 @@
+module Example;
+export Array<int> as IntArray;
+export Array<float> as FloatArray;
+
+template<T>
+pub class Array
+{
+    private data: array;
+
+    constructor(data: array = []) {
+        this.data = data;
+    }
+
+    pub fn at(index: int): T => data[index];
+
+    pub fn size(): int => data.size;
+
+    pub fn getData(): array => data;
+
+    mut fn setData(data: array): void {
+        this.data = data;
+    }
+
+    mut fn append(item: T): void {
+        this.data.push(item);
+    }
+}

@@ -1,0 +1,55 @@
+#!/bin/bash
+#
+# Spin up development environment
+#
+
+set -e
+if [ -e .env.default ] && [ ! -e .env ]; then
+	cp .env.default .env
+fi
+
+# Arguments
+reset=false
+if [[ $1 == '--reset' ]] || [[ $1 == '-r' ]]; then
+	reset=true
+fi
+
+main() {
+	source .env
+	source scripts/utils.sh
+
+	# Kill active containers
+	clean_up_containers
+
+	# Update compile flag + timestamp on a CSS file to trigger compiling
+	mkdir -p var
+	#touch var/compile_css_js
+	#touch public_html/css/print.css
+
+	# Spin up development environment
+	docker-compose up -d
+
+	# Run composer install
+	scripts/composer install --optimize-autoloader
+
+	# Import database files
+	if $reset || [[ ! -f database/data/import_done ]]; then
+		local files=$(ls database/*.sql 2>/dev/null) || true
+		if [[ ! -z $files ]]; then
+			local mysql_id
+			mysql_id=$(docker-compose ps -q mysql 2>&1)
+			warm_up_db "$mysql_id" "$DB_NAME"
+			truncate_db "$mysql_id" "$DB_NAME"
+			echo "Importing to database: "
+			import_db "$mysql_id" "$DB_NAME" "$files"
+			files=$(ls database/migrations/*.sql 2>/dev/null) || true
+			if [[ ! -z $files ]]; then
+				import_db "$mysql_id" "$DB_NAME" "$files"
+			fi
+		fi
+	fi
+
+	print_environment_info
+}
+
+main

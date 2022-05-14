@@ -1,0 +1,46 @@
+module Usage;
+import IntArray from Example;
+import Array from Example; // We can import the array because it was marked "pub".
+
+var listOfInts: IntArray = new { [1, 2, 3, 4, 5,] };
+listOfInts.getData(); // Will return [1, 2, 3, 4, 5]
+listOfInts.setData([6, 7]); // Will throw an error because we didn't declare the variable mutable
+
+class Person {
+    private ssn: string;
+    private firstName: string;
+    private lastName: string;
+    private nickName: mut string; // Nick name can be changed
+
+    constructor(...) = default; // Generates one constructor that takes in ssn, firstName, lastName and nickName).
+
+    pub fn getSsn(): string => ssn;
+
+    pub fn getFirstName(): string => firstName;
+
+    pub fn getLastName(): string => lastName;
+
+    pub fn getNickName(): string => nickName;
+
+    mut fn setNickname(nickName: string): void {
+        this.nickName = nickName; // This is okay because nickname is mutable.
+    }
+};
+
+// Creates an immutable list of people in an easy way
+var people: Array<Person> = new {[
+    new Person("xxxxxxxxxxx", "Patrik", "Dahlberg", "Putte"),
+    new Person("xxxxxxxxxxx", "Oskar", "Dahlberg", "Dalle"),
+]}
+
+// Can also create like so, and people will have the implicit immutable type Array<Person>.
+var people = new Array<Person>{[
+    new Person("xxxxxxxxxxx", "Patrik", "Dahlberg", "Putte"),
+    new Person("xxxxxxxxxxx", "Oskar", "Dahlberg", "Dalle"),
+]}
+
+// Can also do...
+var people: Array<Person> = null;
+
+// Since we declared that people was Array<Person>, we don't need to explicitly mention it when creating it with new
+people = new {[]};

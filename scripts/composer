@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# Composer wrapper
+# Execute composer though a docker container if composer is not available locally
+#
+# Example commands:
+# ./scripts/composer install
+# ./scripts/composer update
+#
+
+command=("$@")
+
+main() {
+	docker-compose exec web bash -c "cd /var/www/ && composer ${command[*]}"
+}
+
+main

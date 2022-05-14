@@ -1,0 +1,15 @@
+/
+/*/
+
+!/bin/
+!/config/
+!/examples/
+!/public_html/
+!/scripts/
+!/src/
+!/tests/
+!/docs/
+
+!.env.default
+!composer.json
+!composer.lock

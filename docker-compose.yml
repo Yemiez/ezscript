@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  web:
+    image: wikinggruppen/php:8.1
+    ports:
+      - ${WEB_PORT}:8080
+      - ${WEB_HTTPS_PORT}:443
+    volumes:
+      - ./public_html:/var/www/public_html
+      - ./examples:/var/www/examples
+      - ./src:/var/www/src
+      - ./var:/var/www/var
+      - ./bin:/var/www/bin
+      - ./config:/var/www/config
+      - ./vendor:/var/www/vendor
+      - ./tests:/var/www/tests
+      - ./composer.json:/var/www/composer.json
+      - ./composer.lock:/var/www/composer.lock
+      - .env:/var/www/.env
+      - ./var/logs/xdebug:/tmp/xdebug
+    environment:
+      - XDEBUG_MODE=debug

@@ -1,0 +1,58 @@
+
+html, body {
+    background-color: #121212;
+    color: white;
+}
+
+.container {
+    width: 1280px;
+    min-height: 200px;
+    margin: 0 auto;
+    background-color: #262626;
+}
+
+.source-container {
+    background-color: #2b2b2b;
+    padding-left: 25px;
+    padding-top: 5px;
+}
+
+.source-container {
+    padding: 24px;
+}
+
+.source-line {
+}
+
+.source-line__gutter {
+    border-right: 1px solid #000;
+}
+
+.source-line__content {
+    scroll-behavior: auto;
+}
+
+.token {
+    font-family: "JetBrains Mono", serif;
+}
+
+.token--comment__simple,
+.token--comment__long {
+    color: #2cff2c;
+    /* color: black; */}
+
+.token--identifier {
+    color: orange;
+}
+
+.token--keyword {
+    color: #7e7eff;}
+
+.token--string {
+    color: red;
+}
+
+.token--integer,
+.token--float {
+    color: #fff07d;
+}
